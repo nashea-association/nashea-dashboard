@@ -435,16 +435,17 @@ html, body {
 }
 
 .bar-label {
-  fill: var(--text-secondary);
-  font-size: 12px;
+  fill: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
   font-family: 'Tajawal', sans-serif;
   direction: rtl;
   unicode-bidi: plaintext;
 }
 
 .bar-value {
-  fill: var(--text-primary);
-  font-size: 12px;
+  fill: var(--text-secondary);
+  font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

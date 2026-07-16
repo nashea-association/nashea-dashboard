@@ -163,29 +163,31 @@
     }
 
     const max = Math.max(...rows.map(r => r[1]), 1);
-    const rowH = 34;
-    const gap = 10;
-    const topPad = 8;
+    const rowH = 38;
+    const gap = 14;
+    const topPad = 10;
     const height = rows.length * (rowH + gap) + topPad;
     const width = 900;
-    const labelW = 220;
-    const valueW = 50;
-    const trackX = labelW;
-    const trackW = width - labelW - valueW;
+    const leftMargin = 12;
+    const rightMargin = 12;
+    const labelW = 260; // reserved zone at the right edge for the status label
+    const trackRight = width - labelW; // bars grow leftward from here
+    const trackW = trackRight - leftMargin;
 
     let bars = '';
     rows.forEach(([status, count], idx) => {
       const y = topPad + idx * (rowH + gap);
       const barW = Math.max((count / max) * trackW, 3);
+      const barX = trackRight - barW;
       const cls = statusClass(status);
       bars += `
         <g>
-          <text class="bar-label" x="${width - 16}" y="${y + rowH / 2 + 4}" text-anchor="start">${escapeXML(status)}</text>
-          <rect class="bar-track" x="${trackX}" y="${y}" width="${trackW}" height="${rowH * 0.55}" rx="6" transform="translate(0, ${rowH * 0.225})" />
-          <rect class="bar-fill ${cls}" x="${trackX + trackW - barW}" y="${y}" width="${barW}" height="${rowH * 0.55}" rx="6" transform="translate(0, ${rowH * 0.225})">
+          <rect class="bar-track" x="${leftMargin}" y="${y}" width="${trackW}" height="${rowH * 0.55}" rx="7" transform="translate(0, ${rowH * 0.225})" />
+          <rect class="bar-fill ${cls}" x="${barX}" y="${y}" width="${barW}" height="${rowH * 0.55}" rx="7" transform="translate(0, ${rowH * 0.225})">
             <title>${escapeXML(status)}: ${count}</title>
           </rect>
-          <text class="bar-value" x="${trackX + trackW - barW - 8}" y="${y + rowH / 2 + 4}" text-anchor="end">${count}</text>
+          <text class="bar-value" x="${barX - 10}" y="${y + rowH / 2 + 5}" text-anchor="end">${count}</text>
+          <text class="bar-label" x="${width - rightMargin}" y="${y + rowH / 2 + 5}" text-anchor="start">${escapeXML(status)}</text>
         </g>`;
     });
 
