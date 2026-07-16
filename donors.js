@@ -148,6 +148,15 @@
     document.getElementById('kpiApprovedAmount').textContent = fmtInt(approved);
   }
 
+  // A CSS-only radial counter per status: conic-gradient ring + plain HTML
+  // text (no SVG text at all), sidestepping any SVG/RTL text-anchor issues.
+  const STATUS_COLOR_VAR = {
+    'status-good': '--good',
+    'status-warning': '--warning',
+    'status-critical': '--critical',
+    '': '--series-1',
+  };
+
   function renderStatusChart(records) {
     const counts = new Map();
     records.forEach(r => {
@@ -156,42 +165,28 @@
     });
     const rows = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
     const container = document.getElementById('statusChart');
+    const total = records.length || 1;
 
     if (!rows.length) {
       container.innerHTML = '<div class="chart-empty">لا توجد بيانات بعد</div>';
       return;
     }
 
-    const max = Math.max(...rows.map(r => r[1]), 1);
-    const rowH = 38;
-    const gap = 14;
-    const topPad = 10;
-    const height = rows.length * (rowH + gap) + topPad;
-    const width = 900;
-    const leftMargin = 12;
-    const rightMargin = 12;
-    const labelW = 260; // reserved zone at the right edge for the status label
-    const trackRight = width - labelW; // bars grow leftward from here
-    const trackW = trackRight - leftMargin;
-
-    let bars = '';
-    rows.forEach(([status, count], idx) => {
-      const y = topPad + idx * (rowH + gap);
-      const barW = Math.max((count / max) * trackW, 3);
-      const barX = trackRight - barW;
+    container.innerHTML = rows.map(([status, count]) => {
       const cls = statusClass(status);
-      bars += `
-        <g>
-          <rect class="bar-track" x="${leftMargin}" y="${y}" width="${trackW}" height="${rowH * 0.55}" rx="7" transform="translate(0, ${rowH * 0.225})" />
-          <rect class="bar-fill ${cls}" x="${barX}" y="${y}" width="${barW}" height="${rowH * 0.55}" rx="7" transform="translate(0, ${rowH * 0.225})">
-            <title>${escapeXML(status)}: ${count}</title>
-          </rect>
-          <text class="bar-value" x="${barX - 10}" y="${y + rowH / 2 + 5}" text-anchor="end">${count}</text>
-          <text class="bar-label" x="${width - rightMargin}" y="${y + rowH / 2 + 5}" text-anchor="start">${escapeXML(status)}</text>
-        </g>`;
-    });
-
-    container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="حالة طلبات المنح">${bars}</svg>`;
+      const colorVar = STATUS_COLOR_VAR[cls] || STATUS_COLOR_VAR[''];
+      const pct = (count / total) * 100;
+      return `
+        <div class="gauge">
+          <div class="gauge-ring" style="--gauge-color: var(${colorVar}); --gauge-pct: ${pct}">
+            <div class="gauge-inner">
+              <div class="gauge-value">${count}</div>
+              <div class="gauge-pct">${pct.toFixed(0)}%</div>
+            </div>
+          </div>
+          <div class="gauge-label">${escapeXML(status)}</div>
+        </div>`;
+    }).join('');
   }
 
   function populateStatusFilter(records) {
